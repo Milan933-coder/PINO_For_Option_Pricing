@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adaptive PINO for Heston Pricing | Interactive Report</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        /* Chosen Palette: Warm Professional */
+        body { font-family: 'Inter', sans-serif; background-color: #FAFAF9; color: #1C1917; }
+        h1, h2, h3, h4, .font-mono { font-family: 'JetBrains Mono', monospace; }
+        
+        /* Chart Container Styling per Requirements */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            height: 300px;
+            max-height: 400px;
+        }
+
+        /* Smooth scroll behavior */
+        html { scroll-behavior: smooth; }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0,0,0,0.05);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .interactive-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-sky-200 selection:text-sky-900">
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 glass-panel border-b border-stone-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <span class="text-xl font-bold tracking-tight text-sky-800 font-mono">PINO<span class="text-stone-500">_Heston</span></span>
+                </div>
+                <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                    <a href="#challenge" class="border-transparent text-stone-500 hover:border-sky-500 hover:text-stone-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">The Challenge</a>
+                    <a href="#methodology" class="border-transparent text-stone-500 hover:border-sky-500 hover:text-stone-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Methodology</a>
+                    <a href="#results" class="border-transparent text-stone-500 hover:border-sky-500 hover:text-stone-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Results</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="relative overflow-hidden bg-white">
+        <div class="max-w-7xl mx-auto">
+            <div class="relative z-10 pb-8 bg-white sm:pb-16 md:pb-20 lg:max-w-2xl lg:w-full lg:pb-28 xl:pb-32">
+                <main class="mt-10 mx-auto max-w-7xl px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 lg:px-8 xl:mt-28">
+                    <div class="sm:text-center lg:text-left">
+                        <h1 class="text-4xl tracking-tight font-extrabold text-stone-900 sm:text-5xl md:text-6xl">
+                            <span class="block xl:inline">Next-Gen Option Pricing</span>
+                            <span class="block text-sky-600">Adaptive PINO Engine</span>
+                        </h1>
+                        <p class="mt-3 text-base text-stone-500 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
+                            An instantaneous, physics-informed neural operator for the Heston Model. Eliminating computational bottlenecks with <strong>270X+ speedups</strong> over Monte Carlo simulations through spectral learning.
+                        </p>
+                        <div class="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
+                            <div class="rounded-md shadow">
+                                <a href="#challenge" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-sky-600 hover:bg-sky-700 md:py-4 md:text-lg transition-all">
+                                    Explore the Tech
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+        <div class="lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2 bg-stone-50 flex items-center justify-center border-l border-stone-100">
+            <!-- Conceptual Visualization using CSS Grid (No SVG) -->
+            <div class="grid grid-cols-3 gap-2 p-8 opacity-75 transform rotate-3 scale-90">
+                <div class="w-24 h-24 bg-sky-100 rounded-lg flex items-center justify-center border border-sky-200 shadow-sm animate-pulse font-mono text-lg font-bold text-sky-800">S<sub>t</sub></div>
+                <div class="w-24 h-24 bg-rose-100 rounded-lg flex items-center justify-center border border-rose-200 shadow-sm font-mono text-lg font-bold text-rose-800">V<sub>t</sub></div>
+                <div class="w-24 h-24 bg-emerald-100 rounded-lg flex items-center justify-center border border-emerald-200 shadow-sm font-mono text-lg font-bold text-emerald-800">t</div>
+                <div class="w-24 h-24 bg-stone-100 rounded-lg flex items-center justify-center border border-stone-200 font-mono text-stone-500">κ</div>
+                <div class="w-24 h-24 bg-stone-800 text-white rounded-lg flex items-center justify-center border border-stone-600 shadow-lg font-mono text-xl font-bold">PINO</div>
+                <div class="w-24 h-24 bg-stone-100 rounded-lg flex items-center justify-center border border-stone-200 font-mono text-stone-500">θ</div>
+                <div class="w-24 h-24 bg-indigo-100 rounded-lg flex items-center justify-center border border-indigo-200 shadow-sm font-mono text-lg font-bold text-indigo-800">σ</div>
+                <div class="w-24 h-24 bg-purple-100 rounded-lg flex items-center justify-center border border-purple-200 shadow-sm font-mono text-lg font-bold text-purple-800">ρ</div>
+                <div class="w-24 h-24 bg-amber-100 rounded-lg flex items-center justify-center border border-amber-200 shadow-sm font-mono text-lg font-bold text-amber-800">r</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 1: The Challenge -->
+    <section id="challenge" class="py-16 bg-stone-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="lg:text-center mb-12">
+                <h2 class="text-base text-sky-600 font-semibold tracking-wide uppercase">Problem Context</h2>
+                <p class="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-stone-900 sm:text-4xl">The Heston Model Bottleneck</p>
+                <p class="mt-4 max-w-2xl text-xl text-stone-500 lg:mx-auto">
+                    The industry standard for stochastic volatility lacks simple closed-form solutions. Current numerical methods force a trade-off between speed and stability.
+                </p>
+            </div>
+
+            <!-- Interactive Equation -->
+            <div class="bg-white rounded-xl shadow-sm border border-stone-200 p-8 mb-12 text-center overflow-x-auto interactive-card">
+                <p class="text-sm text-stone-400 mb-4 font-mono uppercase tracking-widest">Hover over terms to decode</p>
+                <div class="text-2xl md:text-3xl font-serif leading-loose space-y-4">
+                    <div class="cursor-default">
+                        <span class="hover:text-sky-600 hover:bg-sky-50 px-1 rounded transition-colors duration-200" title="Change in Stock Price">dS<sub>t</sub></span> = 
+                        <span class="hover:text-amber-600 hover:bg-amber-50 px-1 rounded transition-colors duration-200" title="Risk-free Rate">r</span>
+                        <span class="hover:text-sky-600 hover:bg-sky-50 px-1 rounded transition-colors duration-200" title="Stock Price">S<sub>t</sub></span> dt + 
+                        <span class="hover:text-sky-600 hover:bg-sky-50 px-1 rounded transition-colors duration-200" title="Stock Price">S<sub>t</sub></span>
+                        <span class="hover:text-rose-600 hover:bg-rose-50 px-1 rounded transition-colors duration-200" title="Square root of Variance (Volatility)">√V<sub>t</sub></span> 
+                        <span class="hover:text-indigo-600 hover:bg-indigo-50 px-1 rounded transition-colors duration-200" title="Brownian Motion 1">dW<sub>t</sub><sup>(1)</sup></span>
+                    </div>
+                    <div class="cursor-default">
+                        <span class="hover:text-rose-600 hover:bg-rose-50 px-1 rounded transition-colors duration-200" title="Change in Variance">dV<sub>t</sub></span> = 
+                        <span class="hover:text-stone-600 hover:bg-stone-50 px-1 rounded transition-colors duration-200" title="Mean Reversion Speed">κ</span>(
+                        <span class="hover:text-stone-600 hover:bg-stone-50 px-1 rounded transition-colors duration-200" title="Long-run Variance">θ</span> - 
+                        <span class="hover:text-rose-600 hover:bg-rose-50 px-1 rounded transition-colors duration-200" title="Current Variance">V<sub>t</sub></span>) dt + 
+                        <span class="hover:text-purple-600 hover:bg-purple-50 px-1 rounded transition-colors duration-200" title="Vol of Vol">σ</span>
+                        <span class="hover:text-rose-600 hover:bg-rose-50 px-1 rounded transition-colors duration-200" title="Square root of Variance">√V<sub>t</sub></span>
+                        <span class="hover:text-indigo-600 hover:bg-indigo-50 px-1 rounded transition-colors duration-200" title="Brownian Motion 2 (Correlated)">dW<sub>t</sub><sup>(2)</sup></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comparison Cards -->
+            <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                <!-- Card 1 -->
+                <div class="bg-white overflow-hidden shadow rounded-lg interactive-card border-t-4 border-stone-400">
+                    <div class="px-4 py-5 sm:p-6">
+                        <h3 class="text-lg leading-6 font-medium text-stone-900">Monte Carlo (MC)</h3>
+                        <div class="mt-2 max-w-xl text-sm text-stone-500">
+                            <p class="mb-2">Simulates thousands of paths to average the payoff.</p>
+                            <ul class="list-disc pl-4 space-y-1">
+                                <li class="text-emerald-600 font-semibold">High Accuracy</li>
+                                <li class="text-rose-600 font-bold">Extremely Slow</li>
+                                <li>Impractical for frequent calibration</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <!-- Card 2 -->
+                <div class="bg-white overflow-hidden shadow rounded-lg interactive-card border-t-4 border-stone-400">
+                    <div class="px-4 py-5 sm:p-6">
+                        <h3 class="text-lg leading-6 font-medium text-stone-900">Fast Fourier Transform</h3>
+                        <div class="mt-2 max-w-xl text-sm text-stone-500">
+                            <p class="mb-2">Inverts characteristic function numerically.</p>
+                            <ul class="list-disc pl-4 space-y-1">
+                                <li class="text-emerald-600 font-semibold">Faster than MC</li>
+                                <li class="text-rose-600 font-bold">Numerically Unstable</li>
+                                <li>Requires manual tuning per case</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <!-- Card 3 -->
+                <div class="bg-white overflow-hidden shadow rounded-lg interactive-card border-t-4 border-sky-500 bg-sky-50">
+                    <div class="px-4 py-5 sm:p-6">
+                        <h3 class="text-lg leading-6 font-medium text-sky-900">PINO Approach</h3>
+                        <div class="mt-2 max-w-xl text-sm text-stone-600">
+                            <p class="mb-2">Solves the Feynman-Kac PDE directly via Neural Operator.</p>
+                            <ul class="list-disc pl-4 space-y-1">
+                                <li class="text-emerald-600 font-bold">Instantaneous</li>
+                                <li class="text-emerald-600 font-semibold">Differentiable (Greeks)</li>
+                                <li class="text-stone-500">Constraint: High VRAM for Training</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 2: Methodology -->
+    <section id="methodology" class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="lg:text-center mb-16">
+                <h2 class="text-base text-sky-600 font-semibold tracking-wide uppercase">The Solution</h2>
+                <p class="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-stone-900 sm:text-4xl">Adaptive PINO Framework</p>
+                <p class="mt-4 max-w-2xl text-xl text-stone-500 lg:mx-auto">
+                    Combining Spectral Convolutions, Hard Physics Constraints, and Adversarial Loss Balancing to solve the Feynman-Kac PDE.
+                </p>
+            </div>
+
+            <!-- Interactive Grid Explanation -->
+            <div class="flex flex-col lg:flex-row gap-12 mb-16 items-center bg-stone-50 p-8 rounded-xl border border-stone-100">
+                <div class="lg:w-1/2">
+                    <h3 class="text-2xl font-bold text-stone-900 mb-4">Grid Point Method: Uniform Collocation</h3>
+                    <p class="text-stone-600 mb-6">
+                        Unlike standard PINNs that sample random points, PINO learns the physics across the entire domain simultaneously. A structured mesh is created across <strong>Stock Price (S)</strong>, <strong>Variance (V)</strong>, and <strong>Time (t)</strong>. The model minimizes the PDE residual at <em>every</em> point on this grid at once.
+                    </p>
+                    <div class="bg-white p-4 rounded-lg border border-stone-200 font-mono text-sm text-stone-700 shadow-sm">
+                        <div class="mb-2"><span class="text-sky-600 font-bold">Current Grid:</span> 48 (S) × 24 (V) × 24 (t)</div>
+                        <div class="mb-2"><span class="text-rose-600 font-bold">Target Grid:</span> 96 (S) × 48 (V) × 48 (t)</div>
+                        <span class="text-stone-400 italic">// High-VRAM required for target resolution</span>
+                    </div>
+                </div>
+                <div class="lg:w-1/2 flex justify-center">
+                    <!-- CSS Grid Visualization of 3D Collocation -->
+                    <div class="grid grid-cols-6 gap-1 p-4 bg-white rounded-xl border border-stone-200 shadow-sm" style="width: 300px; height: 300px;">
+                        <div class="col-span-6 text-center text-xs text-stone-400 pb-2 uppercase tracking-wide">Spatial Domain (S × V)</div>
+                        <!-- Hardcoded visual grid simulation -->
+                        <div class="bg-sky-200 rounded-sm animate-pulse h-8"></div><div class="bg-sky-200 rounded-sm h-8"></div><div class="bg-sky-200 rounded-sm h-8"></div><div class="bg-sky-200 rounded-sm h-8"></div><div class="bg-sky-200 rounded-sm h-8"></div><div class="bg-sky-200 rounded-sm h-8"></div>
+                        <div class="bg-sky-300 rounded-sm h-8"></div><div class="bg-sky-300 rounded-sm animate-pulse h-8"></div><div class="bg-sky-300 rounded-sm h-8"></div><div class="bg-sky-300 rounded-sm h-8"></div><div class="bg-sky-300 rounded-sm h-8"></div><div class="bg-sky-300 rounded-sm h-8"></div>
+                        <div class="bg-sky-400 rounded-sm h-8"></div><div class="bg-sky-400 rounded-sm h-8"></div><div class="bg-sky-400 rounded-sm animate-pulse h-8"></div><div class="bg-sky-400 rounded-sm h-8"></div><div class="bg-sky-400 rounded-sm h-8"></div><div class="bg-sky-400 rounded-sm h-8"></div>
+                        <div class="bg-sky-500 rounded-sm h-8"></div><div class="bg-sky-500 rounded-sm h-8"></div><div class="bg-sky-500 rounded-sm h-8"></div><div class="bg-sky-500 rounded-sm animate-pulse h-8"></div><div class="bg-sky-500 rounded-sm h-8"></div><div class="bg-sky-500 rounded-sm h-8"></div>
+                        <div class="bg-sky-600 rounded-sm h-8"></div><div class="bg-sky-600 rounded-sm h-8"></div><div class="bg-sky-600 rounded-sm h-8"></div><div class="bg-sky-600 rounded-sm h-8"></div><div class="bg-sky-600 rounded-sm animate-pulse h-8"></div><div class="bg-sky-600 rounded-sm h-8"></div>
+                        <div class="col-span-6 text-center text-xs text-stone-400 pt-2">Simultaneous PDE Solving</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Technical Components Tabs -->
+            <div class="bg-white shadow-lg rounded-xl overflow-hidden border border-stone-200">
+                <div class="flex border-b border-stone-200 bg-stone-50 overflow-x-auto">
+                    <button onclick="switchTab('arch')" id="tab-arch" class="px-6 py-4 text-sm font-bold text-sky-700 bg-white border-b-2 border-sky-600 focus:outline-none whitespace-nowrap transition-colors">PINO Architecture</button>
+                    <button onclick="switchTab('ansatz')" id="tab-ansatz" class="px-6 py-4 text-sm font-medium text-stone-500 hover:text-stone-700 focus:outline-none whitespace-nowrap transition-colors">Ansatz Transform</button>
+                    <button onclick="switchTab('wamol')" id="tab-wamol" class="px-6 py-4 text-sm font-medium text-stone-500 hover:text-stone-700 focus:outline-none whitespace-nowrap transition-colors">WamOL Adaptive Loss</button>
+                    <button onclick="switchTab('sobolev')" id="tab-sobolev" class="px-6 py-4 text-sm font-medium text-stone-500 hover:text-stone-700 focus:outline-none whitespace-nowrap transition-colors">Sobolev Regularization</button>
+                </div>
+
+                <div class="p-8">
+                    <!-- Architecture Content -->
+                    <div id="content-arch" class="tab-content block">
+                        <div class="flex flex-col md:flex-row gap-8">
+                            <div class="md:w-1/3 flex flex-col justify-center">
+                                <h4 class="text-lg font-bold text-stone-900">Fourier Neural Operator</h4>
+                                <p class="mt-2 text-stone-600 leading-relaxed">Uses Spectral Convolution Layers in the Fourier domain. This allows the model to learn global, non-local features, providing superior generalization compared to standard MLPs.</p>
+                            </div>
+                            <div class="md:w-2/3 bg-stone-50 p-6 rounded-lg border border-stone-100 flex items-center justify-center">
+                                <!-- Block Diagram via Flexbox -->
+                                <div class="flex flex-col items-center space-y-4 w-full max-w-md">
+                                    <div class="px-4 py-2 bg-stone-200 rounded border border-stone-300 text-xs font-mono">Input (S, V, t, Parameters)</div>
+                                    <div class="h-4 w-0.5 bg-stone-300"></div>
+                                    <div class="flex gap-4 w-full">
+                                        <div class="flex-1 flex flex-col gap-2 p-3 border border-dashed border-sky-300 rounded bg-sky-50">
+                                            <span class="text-xs text-sky-800 font-bold text-center uppercase tracking-wide">Spectral Conv 3D</span>
+                                            <div class="h-8 bg-white border border-sky-200 rounded flex items-center justify-center text-xs shadow-sm">FFT</div>
+                                            <div class="h-8 bg-white border border-sky-200 rounded flex items-center justify-center text-xs shadow-sm">Mix Weights</div>
+                                            <div class="h-8 bg-white border border-sky-200 rounded flex items-center justify-center text-xs shadow-sm">iFFT</div>
+                                        </div>
+                                        <div class="w-1/3 flex items-center justify-center border border-stone-300 rounded bg-white text-xs text-center p-2 shadow-sm">
+                                            ResNet Skip
+                                        </div>
+                                    </div>
+                                    <div class="h-4 w-0.5 bg-stone-300"></div>
+                                    <div class="px-4 py-2 bg-emerald-100 rounded border border-emerald-300 text-xs font-bold text-emerald-800">Output: Option Price</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ansatz Content -->
+                    <div id="content-ansatz" class="tab-content hidden">
+                        <h4 class="text-lg font-bold text-stone-900 mb-2">Addressing the Gibbs Phenomenon</h4>
+                        <p class="text-stone-600 mb-6">At maturity (t=T), the option price has a sharp "kink" (non-differentiable point). Standard spectral methods oscillate wildly here. We solve this by decomposing the solution:</p>
+                        <div class="bg-stone-800 text-stone-100 p-6 rounded-lg font-mono text-sm md:text-base overflow-x-auto shadow-inner">
+                            V(S,V,t) = <span class="text-sky-300">Payoff(S)</span> + <span class="text-emerald-300">TimeValue(S,V,t)</span> × (1 - t/T)
+                        </div>
+                        <ul class="mt-6 space-y-3 list-disc list-inside text-stone-600">
+                            <li><strong class="text-sky-700">Payoff(S):</strong> Analytically known, handles the sharp kink.</li>
+                            <li><strong class="text-emerald-700">TimeValue:</strong> Smooth function, easily learned by the neural network.</li>
+                            <li><strong>Result:</strong> Terminal boundary condition is structurally satisfied. No explicit boundary loss needed.</li>
+                        </ul>
+                    </div>
+
+                    <!-- WamOL Content -->
+                    <div id="content-wamol" class="tab-content hidden">
+                        <h4 class="text-lg font-bold text-stone-900 mb-2">Adversarial Weight Tuning</h4>
+                        <p class="text-stone-600 mb-6">Manual tuning of loss weights (e.g., valuing PDE error vs. Greek error) is difficult. WamOL automates this via a Minimax Game.</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div class="bg-rose-50 p-5 rounded-lg border border-rose-100">
+                                <h5 class="font-bold text-rose-800 border-b border-rose-200 pb-2 mb-3">The Conflict</h5>
+                                <p class="text-sm text-rose-700">
+                                    1. <strong>Network</strong> tries to <span class="underline decoration-rose-400">minimize</span> total loss.<br>
+                                    2. <strong>WamOL</strong> tries to <span class="underline decoration-rose-400">maximize</span> total loss by increasing the weight of the hardest component.
+                                </p>
+                            </div>
+                            <div class="flex items-center">
+                                <p class="text-stone-600 text-sm leading-relaxed">
+                                    <strong>Outcome:</strong> The network is forced to focus on the "weakest link" at any stage of training, ensuring uniform accuracy across PDE, Boundary, and Greek constraints.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sobolev Content -->
+                    <div id="content-sobolev" class="tab-content hidden">
+                        <h4 class="text-lg font-bold text-stone-900 mb-2">Stable Greeks</h4>
+                        <p class="text-stone-600 mb-4">Financial practitioners need "Greeks" (sensitivities) for hedging. Standard PINNs can give accurate prices but noisy derivatives.</p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="flex flex-col bg-white border border-stone-200 p-4 rounded shadow-sm">
+                                <span class="font-mono text-stone-900 font-bold mb-1">Loss<sub>Delta</sub></span>
+                                <span class="text-sm text-stone-500">Smoothness of First Derivative (∂V/∂S)</span>
+                            </div>
+                            <div class="flex flex-col bg-white border border-stone-200 p-4 rounded shadow-sm">
+                                <span class="font-mono text-stone-900 font-bold mb-1">Loss<sub>Gamma</sub></span>
+                                <span class="text-sm text-stone-500">Smoothness of Second Derivative (∂²V/∂S²)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 3: Comparative Analysis -->
+    <section class="py-16 bg-stone-50 border-y border-stone-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-10">
+                <h2 class="text-3xl font-extrabold text-stone-900">Evolution of Research</h2>
+                <p class="mt-4 text-lg text-stone-500">Comparison with State-of-the-Art (Hainaut & Casas)</p>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-stone-200 shadow-sm rounded-lg overflow-hidden border border-stone-200">
+                    <thead class="bg-stone-100">
+                        <tr>
+                            <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-stone-500 uppercase tracking-wider">Feature</th>
+                            <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-stone-500 uppercase tracking-wider">Hainaut & Casas (Baseline)</th>
+                            <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-sky-700 uppercase tracking-wider bg-sky-50">Our Adaptive PINO</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-stone-200">
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-stone-900">Core Architecture</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-stone-500">Standard ResNet (MLP)</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-sky-700 font-bold bg-sky-50/30">Fourier Neural Operator (FNO)</td>
+                        </tr>
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-stone-900">Data Sampling</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-stone-500">Random Point Clouds</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-sky-700 font-bold bg-sky-50/30">Structured Grid Collocation</td>
+                        </tr>
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-stone-900">Loss Balancing</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-stone-500">Fixed / Manual</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-sky-700 font-bold bg-sky-50/30">WamOL Adaptive Weights</td>
+                        </tr>
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-stone-900">Boundary Handling</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-stone-500">Explicit Boundary Loss</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-sky-700 font-bold bg-sky-50/30">Hard Ansatz Transform</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 4: Results & Future Steps -->
+    <section id="results" class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="lg:text-center mb-12">
+                <h2 class="text-base text-rose-600 font-semibold tracking-wide uppercase">Performance Metrics</h2>
+                <p class="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-stone-900 sm:text-4xl">Speed vs. Accuracy Trade-off</p>
+                <p class="mt-4 max-w-2xl text-xl text-stone-500 lg:mx-auto">
+                    The framework is verified for extreme speed, but currently requires HPC scaling to resolve the "Payoff Kink" and reach financial-grade accuracy.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                <!-- Speedup Chart -->
+                <div>
+                    <h3 class="text-lg font-bold text-stone-900 mb-4 text-center">Computational Efficiency</h3>
+                    <div class="chart-container">
+                        <canvas id="speedupChart"></canvas>
+                    </div>
+                    <p class="text-center text-sm text-stone-500 mt-4 font-mono">50 Test Cases | Lower is Better</p>
+                </div>
+
+                <!-- Accuracy Metrics & Next Steps -->
+                <div class="flex flex-col gap-6">
+                    <!-- Speedup Metric -->
+                    <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-6 relative overflow-hidden">
+                        <div class="relative z-10 flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-bold text-emerald-600 uppercase tracking-wider">Speedup Factor</p>
+                                <p class="text-4xl font-extrabold text-emerald-900 mt-1">273.8X</p>
+                                <p class="text-xs text-emerald-700 mt-2">vs. Monte Carlo (200k paths)</p>
+                            </div>
+                            <!-- Simple Icon (CSS) -->
+                            <div class="h-12 w-12 bg-emerald-200 rounded-full flex items-center justify-center text-2xl font-bold text-emerald-700">🚀</div>
+                        </div>
+                    </div>
+
+                    <!-- Error Metric -->
+                    <div class="bg-rose-50 border border-rose-200 rounded-xl p-6 relative">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-bold text-rose-600 uppercase tracking-wider">Current Mean Error (MAE)</p>
+                                <p class="text-4xl font-extrabold text-rose-900 mt-1">$2.75</p>
+                                <p class="text-xs text-rose-800 mt-2">Target: &lt; $0.10</p>
+                            </div>
+                            <!-- Simple Icon (CSS) -->
+                            <div class="h-12 w-12 bg-rose-200 rounded-full flex items-center justify-center text-xl font-bold text-rose-700">⚠️</div>
+                        </div>
+                        <p class="mt-4 text-sm text-stone-600 leading-snug">
+                            <strong>Bottleneck:</strong> Insufficient VRAM limits grid resolution. High frequencies at the strike price are lost.
+                        </p>
+                    </div>
+
+                    <!-- Next Step Card -->
+                    <div class="bg-sky-50 border border-sky-200 rounded-xl p-6">
+                        <h4 class="font-bold text-sky-900 mb-2">Next Step: High-Fidelity Scaling</h4>
+                        <ul class="text-sm text-sky-800 list-disc list-inside space-y-1">
+                            <li>Access High-VRAM HPC Node</li>
+                            <li>Double Grid Resolution (48 → 96)</li>
+                            <li>Increase Network Layers (Width 32 → 64)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-white border-t border-stone-200 py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+            <p class="text-stone-400 text-sm">Adaptive PINO Heston Project</p>
+            <p class="text-stone-400 text-sm font-mono">Status: <span class="text-amber-500 font-bold">Scaling Phase</span></p>
+        </div>
+    </footer>
+
+    <script>
+        // --- Tab Switching Logic ---
+        function switchTab(tabId) {
+            // Hide all contents
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('block'));
+            
+            // Reset tab styles
+            const tabs = ['arch', 'ansatz', 'wamol', 'sobolev'];
+            tabs.forEach(t => {
+                const btn = document.getElementById(`tab-${t}`);
+                btn.classList.remove('text-sky-700', 'bg-white', 'border-b-2', 'border-sky-600', 'font-bold');
+                btn.classList.add('text-stone-500', 'font-medium');
+            });
+
+            // Show selected content
+            document.getElementById(`content-${tabId}`).classList.remove('hidden');
+            document.getElementById(`content-${tabId}`).classList.add('block');
+
+            // Style selected tab
+            const activeBtn = document.getElementById(`tab-${tabId}`);
+            activeBtn.classList.remove('text-stone-500', 'font-medium');
+            activeBtn.classList.add('text-sky-700', 'bg-white', 'border-b-2', 'border-sky-600', 'font-bold');
+        }
+
+        // --- Chart.js Logic ---
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('speedupChart').getContext('2d');
+            
+            // Data derived from report
+            const mcTime = 100; // Relative baseline
+            const pinoTime = 100 / 273.8; // Scaled by speedup factor
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Monte Carlo (Traditional)', 'PINO (Ours)'],
+                    datasets: [{
+                        label: 'Computation Time (Lower is Better)',
+                        data: [mcTime, pinoTime],
+                        backgroundColor: [
+                            'rgba(168, 162, 158, 0.5)', // Stone-400
+                            'rgba(3, 105, 161, 0.8)'    // Sky-700
+                        ],
+                        borderColor: [
+                            'rgba(168, 162, 158, 1)',
+                            'rgba(3, 105, 161, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y', // Horizontal bar chart for easier time comparison
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Relative Processing Time'
+                            },
+                            grid: {
+                                display: false
+                            }
+                        },
+                        y: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    if (context.dataIndex === 1) {
+                                        return 'PINO: ~0.36% of MC time (273X Speedup)';
+                                    }
+                                    return 'Monte Carlo: Baseline Reference';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
